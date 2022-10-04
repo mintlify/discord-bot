@@ -3,6 +3,7 @@
 <br/>
 
 > ### **[Timestamp in UTC] [Author] [Description]**
+
 <br/>
 
 ## Reverse Chronological Order:
