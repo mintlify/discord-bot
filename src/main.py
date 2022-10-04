@@ -42,6 +42,28 @@ class EmbedBuilder:
 # / Procedures
 # ----------------------------------------------------------------
 
+# Update bot
+@bot.slash_command(name="update", description="Update the bot.")
+async def update(ctx):
+    # Check if the author has a role in staff_roles
+    if not any(role.id in config["staff_roles"] for role in ctx.author.roles):
+        embed = EmbedBuilder("Error", "You do not have permission to use this command.").build()
+        await ctx.respond(embed=embed, ephemeral=True)
+        return
+    # Check if the bot is up to date
+    output = os.popen("sh ../scripts/autoupdate.sh").read()
+    # Get last line from this output
+    last_line = output.splitlines()[-1]
+    # If the output is "Already up to date.", the bot is up to date
+    if last_line == "Already up-to-date":
+        embed = EmbedBuilder("Error", "The bot is already up to date.").build()
+        await ctx.respond(embed=embed, ephemeral=True)
+        return
+    else:
+        embed = EmbedBuilder("Success", "The bot has been updated: %s" % last_line).build()
+        await ctx.respond(embed=embed, ephemeral=True)
+        return
+    
 # Ping latency
 @bot.slash_command(name="ping", description="Check bot latency.")
 async def ping(ctx):
