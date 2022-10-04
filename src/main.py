@@ -6,13 +6,13 @@ Find out more about Mintlify here: https://mintlify.com
 """
 # / Imports
 # ----------------------------------------------------------------
-import asyncio, datetime, json, random, time, discord, pymysql, os, sys, discord.ext
+import asyncio, datetime, json, random, time, discord, pymysql, os, sys, discord.ext, string
 from tcp_latency import measure_latency
 from messages import *
 # ----------------------------------------------------------------
 # / Globals
 # ----------------------------------------------------------------
-lst = ["a" ,"b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+lst = list(string.ascii_letters + string.digits)
 token = os.environ.get("MintlifyBotToken")
 username = os.environ.get("DatabaseUsername")
 password = os.environ.get("DatabasePassword")
