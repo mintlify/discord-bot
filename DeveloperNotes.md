@@ -7,6 +7,8 @@
 
 ## Reverse Chronological Order:
 
+[18:14] [Arborym] [Enhanced `README.md` with contribution requirements.]
+
 <br/>
 
 [17:54] [Arborym] [Converted `DeveloperNotes.txt` to `DeveloperNotes.md` to create a more readable format.]
