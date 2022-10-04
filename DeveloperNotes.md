@@ -7,6 +7,10 @@
 
 ## Reverse Chronological Order:
 
+<!-- Please add a <br/> between every entry! -->
+
+<br/>
+
 [18:14] [Arborym] [Enhanced `README.md` with contribution requirements.]
 
 <br/>
