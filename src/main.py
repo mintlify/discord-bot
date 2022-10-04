@@ -48,7 +48,7 @@ class EmbedBuilder:
 async def opentickets(ctx):
     if not any(role.id in staff_roles for role in ctx.author.roles):
         embed = EmbedBuilder("Error", "You do not have permission to use this command.").build()
-        await ctx.respond(embed=embed)
+        await ctx.respond(embed=embed, ephemeral=True)
         return
     else:
         # Make request to database and return all tickets that are currently open
@@ -57,7 +57,7 @@ async def opentickets(ctx):
         db_connection.commit()
         if len(tickets) == 0:
             embed = EmbedBuilder("No Open Tickets", "There are currently no open tickets.").build()
-            await ctx.respond(embed=embed)
+            await ctx.respond(embed=embed, ephemeral=True)
             return
         # Create embed
         embed = discord.Embed(title="Open Ticket List", description="Here is a list of currently open tickets:", color=0x18e299)
@@ -78,7 +78,7 @@ async def gettranscript(ctx, ticket_id: str):
         db_connection.commit()
         if result is None:
             embed = EmbedBuilder("Error", "This ticket does not exist.").build()
-            await ctx.respond(embed=embed)
+            await ctx.respond(embed=embed, ephemeral=True)
             return
         # Get file from transcript name in database
         cursor.execute("SELECT transcript FROM tickets WHERE id = '%s'" % ticket_id)
@@ -91,7 +91,7 @@ async def gettranscript(ctx, ticket_id: str):
         await ctx.respond(embed=embed, file=file, ephemeral=True)
     else:
         embed = EmbedBuilder("Error", "You do not have permission to use this command.").build()
-        await ctx.respond(embed=embed)
+        await ctx.respond(embed=embed, ephemeral=True)
 ### / Staff Commands \ ###
 
 @bot.slash_command(name="claim_ticket", description="Claim a ticket.")
@@ -104,7 +104,7 @@ async def claimticket(ctx, ticket_id: str):
         db_connection.commit()
         if result is None:
             embed = EmbedBuilder("Error", "This ticket does not exist.").build()
-            await ctx.respond(embed=embed)
+            await ctx.respond(embed=embed, ephemeral=True)
             return
         # Check database to see if ticket has already been claimed
         cursor.execute("SELECT resolver FROM tickets WHERE id = %s", ticket_id)
@@ -112,14 +112,14 @@ async def claimticket(ctx, ticket_id: str):
         db_connection.commit()
         if resolver[0] is not None:
             embed = EmbedBuilder("Error", "This ticket has already been claimed.").build()
-            await ctx.respond(embed=embed)
+            await ctx.respond(embed=embed, ephemeral=True)
             return
         guild = ctx.guild
         # Get channel ID from the name of the channel
         channel = discord.utils.get(guild.channels, name=ticket_id)
         if channel is None:
             embed = EmbedBuilder("Error", "This ticket does not exist.").build()
-            await ctx.respond(embed=embed)
+            await ctx.respond(embed=embed, ephemeral=True)
             return
         embed = discord.Embed(title="Ticket Claim", description=f"Claimed ticket: %s" % ticket_id, color=0x18e299)
         await ctx.respond(embed=embed, ephemeral=True)
