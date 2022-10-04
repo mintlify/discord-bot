@@ -1,4 +1,5 @@
 {
-  "staff_roles": [1025454252061098024, 911698702685577216],
+  "_comment": "The last two values in staff_roles are the Mintlify and Developer roles in the Bot Server",
+  "staff_roles": [1025454252061098024, 911698702685577216, 1026895675595702303, 1026889535218516008],
   "administrator_role": 911698702685577216
 }

@@ -345,7 +345,7 @@ async def transferticket(ctx, ticket_id: str, role: discord.Role):
         embed = EmbedBuilder("Error", "You do not have permission to use this command.").build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-@bot.slash_command(name="update", description="Update the bot.")
+@bot.slash_command(name="update-bot", description="Update the bot.")
 async def update(ctx):
     # Check if the author has a role in staff_roles
     if not any(role.id in staff_roles for role in ctx.author.roles):
