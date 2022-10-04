@@ -65,7 +65,7 @@ async def update(ctx):
         return
     
 # Ping latency
-@bot.slash_command(name="pong", description="Check bot latency.")
+@bot.slash_command(name="ping", description="Check bot latency.")
 async def ping(ctx):
     start = time.perf_counter()
     db_connection.ping()
