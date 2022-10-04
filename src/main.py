@@ -58,9 +58,9 @@ async def ping(ctx):
     await ctx.respond(embed=embed, ephemeral=True)
 
 # Meet the staff!
-@bot.slash_command(name="staff", description="Meet the Mintlify staff!")
+@bot.slash_command(name="staff", description="Meet the Community Staff!")
 async def staff(ctx):
-    embed = EmbedBuilder("Meet the Mintlify Staff!", staff_message).build()
+    embed = EmbedBuilder("Meet the Community Staff!", staff_message).build()
     await ctx.respond(embed=embed, ephemeral=True)
 
 # On Bot Load
