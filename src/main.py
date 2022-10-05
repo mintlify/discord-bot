@@ -12,11 +12,11 @@ from messages import *
 # ----------------------------------------------------------------
 # / Globals
 # ----------------------------------------------------------------
-lst = list(string.ascii_letters + string.digits)
-token = os.environ.get("MintlifyBotToken")
-username = os.environ.get("DatabaseUsername")
-password = os.environ.get("DatabasePassword")
-database = os.environ.get("DatabaseNameMintlify")
+lst: list[str] = list(string.ascii_letters + string.digits)
+token: str | None = os.environ.get("MintlifyBotToken")
+username: str | None = os.environ.get("DatabaseUsername")
+password: str | None = os.environ.get("DatabasePassword")
+database: str | None = os.environ.get("DatabaseNameMintlify")
 config_path = "../config/config.json"
 bot = discord.Bot(intents=discord.Intents.all(), command_prefix='/', case_insensitive=True)
 # / Config
@@ -29,7 +29,7 @@ with open(config_path) as config_file:
 # / Classes
 # ----------------------------------------------------------------
 class EmbedBuilder:
-    def __init__(self, title, description, color=0x18e299, image=None):
+    def __init__(self, title, description, color=0x18e299, image=None) -> None:
         self.title = title
         self.description = description
         self.color = color
@@ -45,7 +45,7 @@ class EmbedBuilder:
 # ----------------------------------------------------------------
 # / Admin Commands
 @bot.slash_command(name="open_tickets", description="Get a list of currently open tickets.")
-async def opentickets(ctx):
+async def opentickets(ctx) -> None:
     if not any(role.id in staff_roles for role in ctx.author.roles):
         embed = EmbedBuilder("Error", "You do not have permission to use this command.").build()
         await ctx.respond(embed=embed, ephemeral=True)
@@ -69,7 +69,7 @@ async def opentickets(ctx):
         await ctx.respond(embed=embed, ephemeral=True)
 
 @bot.slash_command(name="get_transcript", description="Get a transcript of a ticket.")
-async def gettranscript(ctx, ticket_id: str):
+async def gettranscript(ctx, ticket_id: str) -> None:
     if any(role.id in staff_roles for role in ctx.author.roles):
         # Check if ticket exists
         db_connection.ping()
@@ -95,7 +95,7 @@ async def gettranscript(ctx, ticket_id: str):
 ### / Staff Commands \ ###
 
 @bot.slash_command(name="claim_ticket", description="Claim a ticket.")
-async def claimticket(ctx, ticket_id: str):
+async def claimticket(ctx, ticket_id: str) -> None:
     if any(role.id in staff_roles for role in ctx.author.roles):
         # Check if ticket exists
         db_connection.ping()
@@ -169,7 +169,7 @@ async def claimticket(ctx, ticket_id: str):
         await ctx.respond(embed=embed, ephemeral=True)
 
 @bot.slash_command(name="close_ticket", description="Close a ticket.")
-async def closeticket(ctx, ticket_id: str):
+async def closeticket(ctx, ticket_id: str) -> None:
     # Check if user has permission to use command
     if any(role.id in staff_roles for role in ctx.author.roles):
         # Check if ticket exists
@@ -264,7 +264,7 @@ async def closeticket(ctx, ticket_id: str):
         await ctx.respond(embed=embed, ephemeral=True)
 
 @bot.slash_command(name="transfer_ticket", description="Transfer a ticket to a higher level.")
-async def transferticket(ctx, ticket_id: str, role: discord.Role):
+async def transferticket(ctx, ticket_id: str, role: discord.Role) -> None:
     if any(role1.id in staff_roles for role1 in ctx.author.roles):
         # Check if ticket exists
         db_connection.ping()
@@ -346,16 +346,16 @@ async def transferticket(ctx, ticket_id: str, role: discord.Role):
         await ctx.respond(embed=embed, ephemeral=True)
 
 @bot.slash_command(name="update-bot", description="Update the bot.")
-async def update(ctx):
+async def update(ctx) -> None:
     # Check if the author has a role in staff_roles
     if not any(role.id in staff_roles for role in ctx.author.roles):
         embed = EmbedBuilder("Error", "You do not have permission to use this command.").build()
         await ctx.respond(embed=embed, ephemeral=True)
         return
     # Check if the bot is up to date
-    output = os.popen("sh ../scripts/autoupdate.sh").read()
+    output: str = os.popen("sh ../scripts/autoupdate.sh").read()
     # Get last line from this output
-    last_line = output.splitlines()[-1]
+    last_line: str = output.splitlines()[-1]
     # If the output is "Already up to date.", the bot is up to date
     if last_line == "Already up-to-date":
         embed = EmbedBuilder("Error", "The bot is already up to date.").build()
@@ -369,32 +369,32 @@ async def update(ctx):
 # / Normal Commands
 
 @bot.slash_command(name="ping", description="Check bot latency.")
-async def ping(ctx):
-    start = time.perf_counter()
+async def ping(ctx) -> None:
+    start: float = time.perf_counter()
     db_connection.ping()
     cursor.execute("SELECT * FROM ping")
     cursor.fetchall()
     db_connection.commit()
-    end = time.perf_counter()
+    end: float = time.perf_counter()
     # Calculate database latency
-    latency = round((end - start) * 1000)
+    latency: int = round((end - start) * 1000)
     network_latency = round(measure_latency(host='google.com')[0], 2)
     embed = EmbedBuilder("Ping", f"**Database Latency:** {latency}ms\n**Network Latency:** {network_latency}ms").build()
     await ctx.respond(embed=embed, ephemeral=True)
 
 # Meet the staff!
 @bot.slash_command(name="staff", description="Meet the Community Staff!")
-async def staff(ctx):
+async def staff(ctx) -> None:
     embed = EmbedBuilder("Meet the Community Staff!", staff_message).build()
     await ctx.respond(embed=embed, ephemeral=True)
 
 @bot.slash_command(name="help", description="Display help message.")
-async def help(ctx):
+async def help(ctx) -> None:
     embed = EmbedBuilder("Help", help_message).build()
     await ctx.respond(embed=embed, ephemeral=True)
 
 @bot.slash_command(name="support", description="Create a ticket.")
-async def support(ctx):
+async def support(ctx) -> None:
     # Embed to confirm if they want the bot to DM them
     embed = EmbedBuilder("Support", support_message).build()
     await ctx.respond(embed=embed, ephemeral=True)
@@ -409,7 +409,7 @@ async def support(ctx):
     # Cancel ticket creation
     await message.add_reaction("❌")
     # Wait for reaction on the DM
-    def check(reaction, user):
+    def check(reaction, user) -> bool:
         return user == ctx.author and str(reaction.emoji) in ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "❌"]
     try:
         reaction, user = await bot.wait_for("reaction_add", timeout=60.0, check=check)
@@ -422,7 +422,7 @@ async def support(ctx):
             dm_embed = discord.Embed(title="Bug Report", description="Please describe the bug you have found. Include any screenshots by adding Imgur links.", color=0x18e299)
             stage2message = await ctx.author.send(embed=dm_embed)
             # Wait for message
-            def check2(message):
+            def check2(message) -> bool:
                 return message.author == ctx.author and message.channel == ctx.author.dm_channel
             try:
                 message = await bot.wait_for("message", timeout=300.0, check=check2)
@@ -477,7 +477,7 @@ async def support(ctx):
             dm_embed = discord.Embed(title="Suggestion", description="Please describe the suggestion. Include any screenshots by adding Imgur links.")
             stage2message = await ctx.author.send(embed=dm_embed)
             # Wait for message
-            def check2(message):
+            def check2(message) -> bool:
                 return message.author == ctx.author and message.channel == ctx.author.dm_channel
             try:
                 message = await bot.wait_for("message", timeout=300.0, check=check2)
@@ -537,7 +537,7 @@ async def support(ctx):
             stage2message = await ctx.author.send(embed=dm_embed)
 
             # Wait for message
-            def check2(message):
+            def check2(message) -> bool:
                 return message.author == ctx.author and message.channel == ctx.author.dm_channel
 
             try:
@@ -600,7 +600,7 @@ async def support(ctx):
             stage2message = await ctx.author.send(embed=dm_embed)
 
             # Wait for message
-            def check2(message):
+            def check2(message) -> bool:
                 return message.author == ctx.author and message.channel == ctx.author.dm_channel
 
             try:
@@ -671,12 +671,12 @@ async def support(ctx):
 
 # On Bot Load
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     await bot.change_presence(activity=discord.Game('/support'))
 
 # Catch any exceptions
 @bot.event
-async def on_command_error(ctx, error):
+async def on_command_error(ctx, error) -> None:
     if isinstance(error, discord.DiscordException):
         error_message = EmbedBuilder("Exception", error)
         error_message.build()
