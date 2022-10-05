@@ -8,16 +8,16 @@ Find out more about Mintlify here: https://mintlify.com
 # ----------------------------------------------------------------
 import asyncio
 import datetime
-import discord
-import discord.ext
 import json
 import os
-import pymysql
 import random
 import string
 import sys
 import time
 
+import discord
+import discord.ext
+import pymysql
 from tcp_latency import measure_latency
 
 from messages import *
