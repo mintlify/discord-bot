@@ -26,9 +26,9 @@ support_message = """
 
 Are you sure you want to create a ticket? This is for reporting bugs, issues, suggesting features, reporting someone or other.
 
--This is for sensitive info, general questions go in <#1025441953569063053> 
+-This is for sensitive info, general questions go in <#1025441953569063053>
 -Please include all relevant information
--Make sure your privacy settings enable the bot to DM you. 
+-Make sure your privacy settings enable the bot to DM you.
 """
 DM_support_message_stage1 = """
 *Mintlify Support*
