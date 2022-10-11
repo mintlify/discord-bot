@@ -10,7 +10,10 @@ class EmbedBuilder:
         self.image: str | None = image
 
     def build(self):
-        embed = discord.Embed(title=self.title, description=self.description, color=self.color)
+        embed = discord.Embed(
+            title=self.title,
+            description=self.description,
+            color=self.color)
         if self.image:
             embed.set_image(url=self.image)
         embed.set_footer(text=self.footer)
