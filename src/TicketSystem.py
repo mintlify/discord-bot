@@ -1,20 +1,20 @@
 import asyncio
 import datetime
-import discord
-import discord.ext
 import json
 import random
 import string
 
+import discord
+import discord.ext
 from discord.ext import commands
 
-from messages import *
 from EmbedBuilder import EmbedBuilder
+from messages import *
 
 
 class TicketCommands(commands.Cog):
 
-    def __init__(self, bot, db_connection):
+    def __init__(self, bot, db_connection) -> None:
         self.bot = bot
         self.db_connection = db_connection
         self.lst: list[str] = list(string.ascii_letters + string.digits)
