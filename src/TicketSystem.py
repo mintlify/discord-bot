@@ -302,6 +302,8 @@ class TicketCommands(commands.Cog):
             embed.add_field(name="Closed by", value=ctx.author, inline=False)
             await user.send(embed=embed)
             # Get time elapsed between response_time and closing the ticket
+            # DM the user the transcript file
+            await user.send(file=discord.File("../transcripts/%s.txt" % ticket_id))
             self.cursor.execute(
                 "SELECT opened_date FROM tickets WHERE id = %s", ticket_id
             )
