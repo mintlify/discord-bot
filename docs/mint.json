@@ -44,7 +44,7 @@
     },
     {
       "group": "Contributing",
-      "pages": ["contributing/guidelines"]
+      "pages": ["contributing/overview", "contributing/rules"]
     }
   ],
   "footerSocials": {
