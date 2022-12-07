@@ -45,6 +45,10 @@
     {
       "group": "Contributing",
       "pages": ["contributing/overview", "contributing/rules"]
+    },
+    {
+      "group": "Architecture",
+      "pages": ["main", "modules/landing", "configuration", "database", "extra"]
     }
   ],
   "footerSocials": {

@@ -1,12 +1,240 @@
 ---
-title: "Introduction"
-description: "Welcome to Mintlify's open-source Discord bot"
+title: "Overview"
+description: "Welcome to Mintlify's open-source Discord bot. With advanced modules like a management engine and a serialized ticketing system, server staff are readily equipped with
+the tools they need while community members are assued they have an open line of communication and protection."
 ---
 
 ## Set-up
 
-How to set up the bot.
+### Installation
+---
+<Tabs>
+  <Tab title="Windows">
+    To begin, you will need to install Python 3.10 or above:
+    - [Python Download Page](https://www.python.org/downloads/).  
 
-## Internal architecture
+    <Info>Make sure to add Python to PATH</Info>
+    <Frame>
+      <img src="https://www.dataquest.io/wp-content/uploads/2022/01/python-installer-img4.webp"/>
+    </Frame>
 
-How the bot works.
+    You can verify both of these are installed by running in a shell:  
+    
+    ```bash Command Prompt
+    python --version && pip --version
+    ```
+
+    <Warning>`pip --version` may give you an error saying the command cannot be found.  
+    In this case, `pip` might be aliased differently. Try something like `pip3` or `pip3.10`.</Warning>  
+
+    Next, some extra PyPI modules are required for some of the bot's functionality:
+
+    ```bash Command Prompt
+    pip install -U pymysql tcp-latency py-cord
+    ```
+
+    - [PyMySQL](https://pypi.org/project/PyMySQL/) is used to connect the bot to the backend server, holding a database for our modules.
+    - [tcp-latency](https://pypi.org/project/tcp-latency/) is used to measure network latency.
+    - [Pycord](https://pypi.org/project/py-cord/) is used for Discord API.
+
+    The last thing needed is the repository itself. The best way to do this is via a shell also:  
+
+    ```bash Command Prompt
+    git clone https://github.com/mintlify/discord-bot
+    ```
+
+    You can also just download this from GitHub manually:
+    <Frame>
+      <img src="https://i.imgur.com/uQ69lmM.png" />
+    </Frame>
+
+  </Tab>
+  <Tab title="macOS">
+    To begin, you will need to install Python 3.10 or above:
+    - [Python Download Page](https://www.python.org/downloads/).  
+
+    or you can install this via [Homebrew](https://brew.sh/):  
+
+    ```bash Terminal
+    brew install python@3.10
+    ```
+      
+    <Info>You may need to also install the `pip` module separately. It is advised against to
+    install this via the `get-pip.py` file as this can break dependencies; instead install this via your package manager.</Info>
+
+    ```bash Terminal
+    python3 -m ensurepip
+    ```
+
+    You can verify both of these are installed by running in a terminal:  
+    ```bash Terminal
+    python3 --version && pip3 --version
+    ```
+    <Warning>`pip3 --version` may give you an error saying the command cannot be found.  
+      In this case, `pip3` might be aliased differently. Try something like `pip` or `pip3.10`.</Warning>  
+
+      Next, some extra PyPI modules are required for some of the bot's functionality:
+
+      ```bash Terminal
+      pip3 install -U pymysql tcp-latency py-cord
+      ```
+
+      - [PyMySQL](https://pypi.org/project/PyMySQL/) is used to connect the bot to the backend server, holding a database for our modules.
+      - [tcp-latency](https://pypi.org/project/tcp-latency/) is used to measure network latency.
+      - [Pycord](https://pypi.org/project/py-cord/) is used for Discord API.
+
+      The last thing needed is the repository itself. The best way to do this is via a shell also:  
+
+      ```bash Terminal
+      git clone https://github.com/mintlify/discord-bot
+      ```
+
+      You can also just download this from GitHub manually:
+      <Frame>
+        <img src="https://i.imgur.com/uQ69lmM.png" />
+      </Frame>
+  </Tab>
+  <Tab title="Linux">
+    To begin, you will need to install Python 3.10 or above:
+    - [Python Download Page](https://www.python.org/downloads/).  
+
+    or you can install this via your <Tooltip tip="apt, pacman, dnf...">package manager</Tooltip>:  
+
+    ```bash Terminal
+    brew install python@3.10
+    ```
+      
+    <Info>You may need to also install the `pip` module separately. It is advised against to
+    install this via the `get-pip.py` file as this can break dependencies; instead install this via your package manager.</Info>
+
+    ```bash Terminal
+    python3 -m ensurepip
+    ```
+
+    You can verify both of these are installed by running in a terminal:  
+    ```bash Terminal
+    python3 --version && pip3 --version
+    ```
+    <Warning>`pip3 --version` may give you an error saying the command cannot be found.  
+      In this case, `pip3` might be aliased differently. Try something like `pip` or `pip3.10`.</Warning>  
+
+      Next, some extra PyPI modules are required for some of the bot's functionality:
+
+      ```bash Terminal
+      pip3 install -U pymysql tcp-latency py-cord
+      ```
+
+      - [PyMySQL](https://pypi.org/project/PyMySQL/) is used to connect the bot to the backend server, holding a database for our modules.
+      - [tcp-latency](https://pypi.org/project/tcp-latency/) is used to measure network latency.
+      - [Pycord](https://pypi.org/project/py-cord/) is used for Discord API.
+
+      The last thing needed is the repository itself. The best way to do this is via a shell also:  
+
+      ```bash Terminal
+      git clone https://github.com/mintlify/discord-bot
+      ```
+
+      You can also just download this from GitHub manually:
+      <Frame>
+        <img src="https://i.imgur.com/uQ69lmM.png" />
+      </Frame>
+  </Tab>
+</Tabs>
+
+### Configuration
+---
+There are a few variables and configurations that need changing before running the bot.
+As a primary, the environment variables need configuring. The corresponding environment variables
+need to be initialized:
+
+- **MintlifyBotToken**
+  - This is your bot token retrieved from the [Discord Developer Portal](https://discord.com/developers/applications).
+- **DatabaseUsername**
+  - This is the username for PyMySQL.
+- **DatabasePassword**
+  - This is the password for PyMySQL.
+- **DatabaseNameMintlify**
+  - This is your database name.
+
+While it is possible to configure this relationship differently, the configuration used here was PyMySQL
+running on the same server as the MySQL database. You can change the environment variable names, database name,
+and other aspects however you will need to update the source code accordingly.
+
+The other configuration aspect is the `config.json` file located in the `config` folder.
+This file contains:
+
+- **staff_roles**  
+  - Contains the IDs of the Discord roles that have staff permissions.
+- **administrator_role**
+  - Contains the IDs of the Discord roles that have administrator permissions.
+
+Both of these need to be updated, because not every Discord server has identical
+role IDs. By default, these arrays hold the IDs for the official Mintlify server.
+
+The `config.json` file should look something like this:
+
+```json
+{
+  "staff_roles": [ // Change these IDs.
+    1025454252061098024, 
+    911698702685577216, 
+    1026895675595702303, 
+    1026889535218516008
+    ], 
+  "administrator_role": [ // Change these IDs.
+    911698702685577216, 
+    1026895675595702303, 
+    1026889535218516008
+    ] 
+}
+```
+
+### Extra
+---
+Some additional things you can do for QOL (Quality of Life) for this bot are rather simple.
+
+Firstly:  
+- Automatic bot threads
+  - Installing `pm2` via [Node.js](https://nodejs.org/en/) and running the `main.py` file on `pm2`. More details can be
+  found [here](https://towardsdatascience.com/automate-your-python-script-with-pm2-463238ea0b65).
+  ```bash Terminal
+  pm2 start main.py --name MintlifyBot --interpreter python3
+  ```
+- SSH Tunnel to the server
+  - Using `SSHTunnelForwarder` with PyMySQL for direct connection to the server, useful for if you run
+  the code on a different machine to the database. When used in the past, this proved to be very finnicky.
+  ```python main.py
+  with SSHTunnelForwarder(
+        (ssh_host, ssh_port),
+        ssh_username=ssh_user,
+        ssh_pkey=mypkey,
+        remote_bind_address=(sql_hostname, sql_port)) as tunnel:
+    conn = pymysql.connect(host='127.0.0.1', user=sql_username,
+            passwd=sql_password, db=sql_main_database,
+            port=tunnel.local_bind_port)
+    ...
+  ```
+
+## Deep-dive
+
+### Internal architecture
+
+<Card title="Driver" icon="code" href="/main">
+  Analysis of the bot's main driver code.
+</Card>
+
+<Card title="Modules" icon="cubes" href="/modules/landing">
+  Analysis of the bot's modules and functionalities.
+</Card>
+
+<Card title="Configuration" icon="gears" href="/configuration">
+  Setting up configuration variables.
+</Card>
+
+<Card title="Database" icon="sitemap" href="/database">
+  Database setup.
+</Card>
+
+<Card title="Extra" icon="circle-nodes" href="/extra">
+  Additional (optional) tasks/setting up for QOL.
+</Card>

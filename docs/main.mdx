@@ -1,0 +1,99 @@
+---
+title: "Driver"
+description: "This is the driver code, or the hypervisor in a sense, which governs the entire bot and its modules. Any piece of code is run under this,
+which means any changes to subsidiary modules will pass through here at some point."
+---
+
+## Overview
+
+### mainloop
+---
+```python main.py
+import ...
+# ----------------------------------------------------------------
+# / Globals
+# ----------------------------------------------------------------
+token: str | None = os.environ.get("MintlifyBotToken")
+username: str | None = os.environ.get("DatabaseUsername")
+password: str | None = os.environ.get("DatabasePassword")
+database: str | None = os.environ.get("DatabaseNameMintlify")
+config_path = "../config/config.json"
+try:
+    db_connection = pymysql.connect(host='127.0.0.1', user=username, password=password, database=database,
+                                    port=3306)
+    print("\u001b[32mSuccessfully connected to: %s \u001b[0m" % (db_connection.get_server_info()))
+    cursor = db_connection.cursor()
+except Exception as e:
+    print("\u001b[31mFailed to connect to server/database.\n\u001b[35mError description: %s \u001b[0m" % (repr(e)))
+    sys.exit(-1)
+bot = discord.Bot(intents=discord.Intents.all(), command_prefix='/', case_insensitive=True)
+bot.add_cog(StandardCommands(bot, db_connection, cursor))
+bot.add_cog(TicketCommands(bot, db_connection))
+bot.add_cog(MaintenanceEngine(bot, db_connection))
+
+# / Config
+# ----------------------------------------------------------------
+with open(config_path) as config_file:
+    config = json.load(config_file)
+    staff_roles = config["staff_roles"]
+    administrator_role = config["administrator_role"]
+    config_file.close()
+
+if __name__ == '__main__':
+    try:
+        bot.run(token)
+    except Exception as e:
+        print("\u001b[31mFailed to run bot.\n\u001b[35mError description: %s \u001b[0m" % (repr(e)))
+        sys.exit(-1)
+```
+
+## Analysis
+
+### Environment variables
+---
+```python main.py
+token: str | None = os.environ.get("MintlifyBotToken")
+username: str | None = os.environ.get("DatabaseUsername")
+password: str | None = os.environ.get("DatabasePassword")
+database: str | None = os.environ.get("DatabaseNameMintlify")
+```
+
+These 4 environment variables will need to be defined in order for the SQL connection and Discord API connection to be established. You can change
+these variable names as long as you also use those names to define your environment variables.
+
+<Tabs>
+    <Tab title="Windows">
+        You can find your environment variables by opening your Search bar and typing _Environment Variables_. Once you open this,
+        you will see the following menu:
+        <Frame>
+            <img src="https://i.imgur.com/XQoauFN.png" />
+        </Frame>  
+        You will need to enter the menu highlighted by the arrow. This will open quite an intimidating menu, but please persevere!  
+
+        <Warning>From this point on, be very careful with your actions. One wrong action has the potential to cause quite
+            severe damage to your system.</Warning>
+        <Frame>
+            <img src="https://i.imgur.com/HFDnp1y.png" />
+        </Frame>
+        For each variable, you will need to add an entry into your environment variables. As seen in the screenshot, `MintlifyBotToken` is already added with the associated
+        Discord API bot token.
+
+        <Info>When adding these variables, they may not be immediately initialized or accessible. You may need to reboot your system after doing this so that your
+            new changes can be detected.</Info>
+    </Tab>
+
+    <Tab title="macOS/Linux">
+        Your environment variables can be found in your shell: `echo $<variable>`
+            ```bash Terminal
+            $ echo $PATH
+            > path1:path2:path3:...
+            ```
+        To add variables, you have 2 options: either add them directly to a file (`/etc/environment`), or use the `export` command:
+        ```bash Terminal
+        $ export $<variable>=<value>
+        ```
+
+        <Info>When adding these variables, they may not be immediately initialized or accessible. You may need to reboot your system after doing this so that your
+            new changes can be detected. You will also need to refresh the shell to use these new variables.</Info>
+    </Tab>
+</Tabs>
