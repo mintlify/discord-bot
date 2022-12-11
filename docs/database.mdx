@@ -6,13 +6,13 @@ description: "Database creation and configuration."
 One database holds 2 tables by default:
 
 - Database: `mintlify`
-    - Table: `ping`: Holds 150 records of dummy data randomly generated. The bot will call upon this table as part of the <a href="modules/standardcommands">Standard Commands</a>
+  - Table: `ping`: Holds 150 records of dummy data randomly generated. The bot will call upon this table as part of the <a href="modules/standardcommands">Standard Commands</a>
     module.
     Excerpt from <a href="modules/standardcommands">Standard Commands</a>:
-    ```sql mintlify.ping
-    SELECT * FROM `mintlify`.`ping`;
-    ```
-    - Table: `tickets`: Holds information of all tickets in the system, open or closed.
+  ```sql mintlify.ping
+  SELECT * FROM `mintlify`.`ping`;
+  ```
+  - Table: `tickets`: Holds information of all tickets in the system, open or closed.
 
 To connect to this through the bot, we have 2 ways:
 
@@ -21,7 +21,9 @@ To connect to this through the bot, we have 2 ways:
   ```python main.py
     db_connection = pymysql.connect(host='127.0.0.1', user=username, password=password, database=database, port=3306)
   ```
-  <Info>Make sure to replace your IP and port information here accordingly.</Info>
+  <Info>
+    Make sure to replace your IP and port information here accordingly.
+  </Info>
 - **Way 2**
   - SSH Tunnel
   ```python main.py
@@ -36,14 +38,16 @@ To connect to this through the bot, we have 2 ways:
   ```
   <Info>Make sure to replace your IPs and ports here accordingly.</Info>
 
-
 ## Structure
 
 ### ping
 
-<img src="https://i.imgur.com/3kRGxLi.png"/>
+<img src="https://i.imgur.com/3kRGxLi.png" />
 
-<Info>Collation does not matter here; the only time Collation really matters is when you are planning to store raw UTF-8 bytes or other encodings in the database.</Info>
+<Info>
+  Collation does not matter here; the only time Collation really matters is when
+  you are planning to store raw UTF-8 bytes or other encodings in the database.
+</Info>
 
 - `id`: integer, holds the entry number of the record.
 - `name`: text, holds a randomly generated word.
@@ -52,9 +56,12 @@ To connect to this through the bot, we have 2 ways:
 
 ### tickets
 
-<img src="https://i.imgur.com/MLLs4g1.png"/>
+<img src="https://i.imgur.com/MLLs4g1.png" />
 
-<Info>Collation does not matter here; the only time Collation really matters is when you are planning to store raw UTF-8 bytes or other encodings in the database.</Info>
+<Info>
+  Collation does not matter here; the only time Collation really matters is when
+  you are planning to store raw UTF-8 bytes or other encodings in the database.
+</Info>
 
 - `id`: 8 character text, holds a randomly generated string made of: \{A-z 0-9\}.
 - `category`: text, holds the category of ticket. This is also similar, if not identical, to the category in the Discord server of which the channel is created under.
