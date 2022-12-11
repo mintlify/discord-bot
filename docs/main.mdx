@@ -102,3 +102,21 @@ these variable names as long as you also use those names to define your environm
     </Tab>
 
 </Tabs>
+
+### Discord Bot API
+
+---
+
+```python main.py
+bot = discord.Bot(intents=discord.Intents.all(), command_prefix='/', case_insensitive=True)
+bot.add_cog(StandardCommands(bot, db_connection, cursor))
+bot.add_cog(TicketCommands(bot, db_connection))
+bot.add_cog(MaintenanceEngine(bot, db_connection))
+```
+
+Here, a `Bot` is created with all user intents - this grants the highest statistical rights for the bot to see over server users, which allows expansion of modules
+and functionality. This can be changed at the installer's will, however by default we have left this at `all`. We also add each module as a `Cog`, maintaining modularity
+in the bot's structure. This also means new modules, custom modules and other things can be added with pure ease underneath these with one simple line!
+
+- For the configuration part of this driver code, please refer to the <a href="configuration/">Configuration</a> chapter.
+- For the database part of this driver code, please refer to the <a href="database/">Database</a> chapter.
