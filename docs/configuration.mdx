@@ -1,0 +1,60 @@
+---
+title: "Configuration"
+description: "Bot configuration."
+---
+
+```python main.py
+# / Config
+# ----------------------------------------------------------------
+with open(config_path) as config_file:
+    config = json.load(config_file)
+    staff_roles = config["staff_roles"]
+    administrator_role = config["administrator_role"]
+    config_file.close()
+
+if __name__ == '__main__':
+    try:
+        bot.run(token)
+    except Exception as e:
+        print("\u001b[31mFailed to run bot.\n\u001b[35mError description: %s \u001b[0m" % (repr(e)))
+        sys.exit(-1)
+```
+
+As stated in the <a href="introduction">Introduction</a> chapter:
+> The other configuration aspect is the `config.json` file located in the `config` folder.
+> This file contains:
+> 
+> - **staff_roles**
+  > - Contains the IDs of the Discord roles that have staff permissions.
+> - **administrator_role**
+  > - Contains the IDs of the Discord roles that have administrator permissions.
+> 
+> Both of these need to be updated, because not every Discord server has identical
+> role IDs. By default, these arrays hold the IDs for the official Mintlify server.
+> 
+> The `config.json` file should look something like this:
+> 
+<Frame>
+<img src="https://i.imgur.com/G2O03VJ.png"/>
+</Frame>
+
+This configuration is loaded at the start of every module, and any changes made means the bot will need to be reloaded. We are in the process of making bot modules
+and configuration refreshable while live.
+
+`bot.run(token)` is a strange line to approach. Anything written after this line will be completely ignored until the bot stops running (not by force).
+You may be able to run this as a parallel thread to another using libraries like `multiprocessing` or `threading` however this is untested by us. If there
+are any changes made to this that need to be run in parallel, they are usually done with the `@bot` decorator:
+
+```python main.py
+@bot.event
+async def on_message(ctx):
+    ...
+```
+
+Lastly:
+
+- Ensure all firewall and ingress rules are set accordingly.
+- Ensure file permissions and paths are correct.
+- Ensure IDs and channel names/categories are correct.
+
+<Warning>Any critical errors that occur prevent your bot from coming online, unless they occur in a `Cog` or module.</Warning>

@@ -14,6 +14,29 @@ One database holds 2 tables by default:
     ```
     - Table: `tickets`: Holds information of all tickets in the system, open or closed.
 
+To connect to this through the bot, we have 2 ways:
+
+- **Way 1**
+  - Direct Connection
+  ```python main.py
+    db_connection = pymysql.connect(host='127.0.0.1', user=username, password=password, database=database, port=3306)
+  ```
+  <Info>Make sure to replace your IP and port information here accordingly.</Info>
+- **Way 2**
+  - SSH Tunnel
+  ```python main.py
+    with SSHTunnelForwarder(
+      (ssh_host, ssh_port),
+      ssh_username=ssh_user,
+      ssh_pkey=mypkey,
+      remote_bind_address=(sql_hostname, sql_port)) as tunnel:
+        conn = pymysql.connect(host='127.0.0.1', user=username,
+            passwd=password, db=database,
+            port=tunnel.local_bind_port)
+  ```
+  <Info>Make sure to replace your IPs and ports here accordingly.</Info>
+
+
 ## Structure
 
 ### ping
