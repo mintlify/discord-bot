@@ -40,15 +40,35 @@
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": ["introduction"]
+      "pages": [
+        "introduction"
+      ]
     },
     {
       "group": "Contributing",
-      "pages": ["contributing/overview", "contributing/rules"]
+      "pages": [
+        "contributing/overview",
+        "contributing/rules"
+      ]
     },
     {
       "group": "Architecture",
-      "pages": ["main", "modules/landing", "configuration", "database", "extra"]
+      "pages": [
+        "main",
+        "modules/landing",
+        "configuration",
+        "database",
+        "extra"
+      ]
+    },
+    {
+      "group": "Modules",
+      "pages": [
+        "modules/Embed Builder",
+        "modules/Maintenance Engine",
+        "modules/Standard Commands",
+        "modules/Ticket System"
+      ]
     }
   ],
   "footerSocials": {
