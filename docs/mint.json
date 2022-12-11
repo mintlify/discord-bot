@@ -64,10 +64,10 @@
     {
       "group": "Modules",
       "pages": [
-        "modules/Embed Builder",
-        "modules/Maintenance Engine",
-        "modules/Standard Commands",
-        "modules/Ticket System"
+        "modules/embedbuilder",
+        "modules/maintenanceengine",
+        "modules/standardcommands",
+        "modules/ticketsystem"
       ]
     }
   ],

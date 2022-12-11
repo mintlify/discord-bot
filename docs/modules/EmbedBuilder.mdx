@@ -1,27 +1,29 @@
-# EmbedBuilder
-
-The `EmbedBuilder` class is a utility for creating Discord `Embed` objects. It allows users to easily construct `Embed`s with a given title, description, color, and image.
+---
+title: "EmbedBuilder"
+description: "The `EmbedBuilder` class is a wrapper for creating Discord `Embed` objects. It allows users to easily construct `Embed`s with a given title, description, color, and image."
+---
 
 ## Usage
 
-To use `EmbedBuilder`, import it from the `discord` module and create an instance of the class. The `EmbedBuilder` constructor takes the following arguments:
+To use `EmbedBuilder`, import it from the `EmbedBuilder` local module with `discord` and create an instance of the class. The `EmbedBuilder` constructor takes the following arguments:
 
 - `title`: The title of the `Embed`. This can be a string of any length.
 - `description`: The description of the `Embed`. This can also be a string of any length.
-- `color`: The color of the `Embed`. This should be an integer representing a hexadecimal color code. The default value is 0x18E299.
+- `color`: The color of the `Embed`. This should be an integer representing a hexadecimal color code. The default value is `0x18e299`.
 - `image`: The image to include in the `Embed`. This should be a string containing the URL of the image. The default value is `None`, which means that no image will be included.
 
-Once you have created an instance of `EmbedBuilder`, you can use the `build` method to construct and return a `Embed` object.
+Once you have created an instance of `EmbedBuilder`, you can use the `build` method to construct and return a `discord.Embed` object.
 
-```python
+```python EmbedBuilder.py
 import discord
+from EmbedBuilder import EmbedBuilder
 
 # Create an instance of EmbedBuilder
 embed_builder = EmbedBuilder(
     title="My Embed",
     description="This is my awesome Embed!",
-    color=0x18E299,
-    image="https://example.com/image.png",
+    color=0x18e299,
+    image="https://imgur.com/gallery/VWjRf",
 )
 
 # Build and return the Embed
@@ -30,10 +32,11 @@ embed = embed_builder.build()
 
 ## Example
 
-Here is an example of how you might use `EmbedBuilder` to create a `Embed` in a Discord bot:
+Here is an example of how you might use `EmbedBuilder` to create a `discord.Embed` in a Discord bot:
 
-```py
+```python main.py
 import discord
+from EmbedBuilder import EmbedBuilder
 
 # Import EmbedBuilder
 from discord.ext.commands import Bot
@@ -48,8 +51,8 @@ async def create_embed(ctx):
     embed_builder = EmbedBuilder(
         title="My Embed",
         description="This is my awesome Embed!",
-        color=0x18E299,
-        image="https://example.com/image.png",
+        color=0x18e299,
+        image="https://imgur.com/gallery/VWjRf",
     )
 
     # Build and send the Embed
