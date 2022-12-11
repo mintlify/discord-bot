@@ -2,12 +2,14 @@ import discord
 
 
 class EmbedBuilder:
-    def __init__(self, title, description, color=0x18E299, image=None) -> None:
-        self.title: str | None = title
-        self.description: str | None = description
+    def __init__(
+        self, title: str, description: str, color: int = 0x18E299, image: str = None
+    ) -> None:
+        self.title = title
+        self.description = description
         self.color = color
         self.footer = "Powered by Mintlify"
-        self.image: str | None = image
+        self.image = image
 
     def build(self) -> discord.Embed:
         embed = discord.Embed(
