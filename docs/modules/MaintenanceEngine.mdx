@@ -1,0 +1,16 @@
+---
+title: "MaintenanceEngine"
+description: "The `MaintenanceEngine` class scans through the bot's databases for invalid entries. This is only according to the data types in the database, so if you change
+these, then this module might raise incorrect errors."
+---
+
+The Maintenance Engine module contains 1 command that can be run anywhere in your Discord server (dependent on the bot's role and permissions):
+
+- `/me_scan`: Takes 0 parameters, searches for Database Integrity and Database Consistency violations.
+
+<ins>**Integrity checks:**</ins>
+
+- Invalid database values, like duplicates or values that do not conform to format/standard.
+- NULL values where they should not be, like a NULL category for tickets.
+- Invalid date values, like dates in the future or negative time codes.
+- Invalid Discord ID numbers (**not** verifying users exist, but verifying the length fits that of an ID)
