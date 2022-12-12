@@ -1,13 +1,13 @@
-import discord.ext
 import json
 import os
-import pymysql
-
 import sys
 
+import discord.ext
+import pymysql
+
+from MaintenanceEngine import MaintenanceEngine
 from standard_commands import StandardCommands
 from TicketSystem import TicketCommands
-from MaintenanceEngine import MaintenanceEngine
 
 # ----------------------------------------------------------------
 # / Globals

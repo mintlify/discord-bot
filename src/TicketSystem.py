@@ -1,15 +1,15 @@
 import asyncio
 import datetime
-import discord
-import discord.ext
 import json
 import random
 import string
 
+import discord
+import discord.ext
 from discord.ext import commands
 
-from messages import *
 from EmbedBuilder import EmbedBuilder
+from messages import *
 
 
 class TicketCommands(commands.Cog):
@@ -30,7 +30,7 @@ class TicketCommands(commands.Cog):
     @commands.slash_command(
         name="open_tickets", description="Get a list of currently open tickets."
     )
-    async def opentickets(self, ctx) -> None:
+    async def opentickets(self, ctx: commands.Context) -> None:
         if not any(role.id in self.staff_roles for role in ctx.author.roles):
             embed = EmbedBuilder(
                 "Error", "You do not have permission to use this command."
@@ -70,7 +70,7 @@ class TicketCommands(commands.Cog):
     @commands.slash_command(
         name="get_transcript", description="Get a transcript of a ticket."
     )
-    async def gettranscript(self, ctx, ticket_id: str) -> None:
+    async def gettranscript(self, ctx: commands.Context, ticket_id: str) -> None:
         if any(role.id in self.staff_roles for role in ctx.author.roles):
             # Check if ticket exists
             self.db_connection.ping()
@@ -105,7 +105,7 @@ class TicketCommands(commands.Cog):
             await ctx.respond(embed=embed, ephemeral=True)
 
     @commands.slash_command(name="claim_ticket", description="Claim a ticket.")
-    async def claimticket(self, ctx, ticket_id: str) -> None:
+    async def claimticket(self, ctx: commands.Context, ticket_id: str) -> None:
         if any(role.id in self.staff_roles for role in ctx.author.roles):
             # Check if ticket exists
             self.db_connection.ping()
@@ -213,7 +213,7 @@ class TicketCommands(commands.Cog):
             await ctx.respond(embed=embed, ephemeral=True)
 
     @commands.slash_command(name="close_ticket", description="Close a ticket.")
-    async def closeticket(self, ctx, ticket_id: str) -> None:
+    async def closeticket(self, ctx: commands.Context, ticket_id: str) -> None:
         # Check if user has permission to use command
         try:
             ctx.guild.channels
@@ -365,7 +365,9 @@ class TicketCommands(commands.Cog):
     @commands.slash_command(
         name="transfer_ticket", description="Transfer a ticket to a higher level."
     )
-    async def transferticket(self, ctx, ticket_id: str, role: discord.Role) -> None:
+    async def transferticket(
+        self, ctx: commands.Context, ticket_id: str, role: discord.Role
+    ) -> None:
         try:
             ctx.guild.channels
         except AttributeError:
@@ -497,7 +499,7 @@ class TicketCommands(commands.Cog):
     # / Normal Commands
 
     @commands.slash_command(name="support", description="Create a ticket.")
-    async def support(self, ctx) -> None:
+    async def support(self, ctx: commands.Context) -> None:
         # Embed to confirm if they want the bot to DM them
         guild = ctx.guild
         # Check for if the command was sent in DM to the bot
