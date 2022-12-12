@@ -1,0 +1,57 @@
+---
+title: "StandardCommands"
+description: "Standard commands for the Mintlify Discord bot."
+---
+
+The `StandardCommands` class is a `Cog` for the [discord.py](https://discordpy.readthedocs.io/en/latest/) library, which allows for the creation of custom Discord commands. The class has the following methods:
+
+- `__init__()` - The constructor for the `StandardCommands` class, which takes in the following parameters:
+- `bot` - An instance of the `commands.Bot` class representing the bot.
+- `db_connection` - A database connection object.
+- `cursor` - A database cursor object.
+- `ping()` - A `slash_command` that measures the latency of the bot and its database connection. The command responds with an [Embed](https://discordpy.readthedocs.io/en/latest/api.html#discord.Embed) that displays the database latency in milliseconds and the network latency in seconds.
+- `staff()` - A `slash_command` that displays information about the community staff in an Embed. The information is taken from the `staff_message` string defined in the messages module.
+- `helpme()` - A `slash_command` that displays a help message in an Embed. The message is taken from the `help_message` string defined in the `messages` module.
+
+## Importing
+
+To use the `StandardCommands` class, the following modules must be imported:
+
+```python
+from discord.ext import commands
+from EmbedBuilder import EmbedBuilder
+from tcp_latency import measure_latency
+from messages import staff_message, help_message
+```
+
+## Example Usage
+
+```python
+# Create a bot instance
+bot = commands.Bot(...)
+
+# Create a database connection and cursor
+db_connection = ...
+cursor = ...
+
+# Create an instance of the StandardCommands cog
+standard_commands = StandardCommands(bot, db_connection, cursor)
+
+# Add the cog to the bot
+bot.add_cog(standard_commands)
+```
+
+Once the cog has been added to the bot, users can use the `/ping`, `/staff`, and `/help` commands to interact with the bot. For example, to check the bot's latency, a user would send the following message:
+
+```
+/ping
+```
+
+The bot would then respond with an Embed containing the database and network latencies:
+
+```
+Database Latency: [latency in ms]
+Network Latency: [latency in seconds]
+```
+
+Similarly, the `/staff` and `/help` commands would display the respective information in an Embed.
