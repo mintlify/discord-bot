@@ -3,7 +3,7 @@ title: "StandardCommands"
 description: "Standard commands for the Mintlify Discord bot."
 ---
 
-The `StandardCommands` class is a `Cog` for the [discord.py](https://discordpy.readthedocs.io/en/latest/) library, which allows for the creation of custom Discord commands. The class has the following methods:
+The `StandardCommands` class is a `Cog` for the [discord.py](https://discordpy.readthedocs.io/en/latest/) library, which allows for the creation of custom Discord commands. The class has the following methods and attributes:
 
 - `__init__()` - The constructor for the `StandardCommands` class, which takes in the following parameters:
 - `bot` - An instance of the `commands.Bot` class representing the bot.
@@ -22,6 +22,7 @@ from discord.ext import commands
 from EmbedBuilder import EmbedBuilder
 from tcp_latency import measure_latency
 from messages import staff_message, help_message
+import time
 ```
 
 ## Example Usage

@@ -4,9 +4,7 @@ description: "The `MaintenanceEngine` class scans through the bot's databases fo
 these, then this module might raise incorrect errors."
 ---
 
-The Maintenance Engine module contains 1 command that can be run anywhere in your Discord server (dependent on the bot's role and permissions):
-
-- `/me_scan`: Takes 0 parameters, searches for database integrity and consistency violations.
+The Maintenance Engine runs 2 types of database checks, dependent on the database/table structure.
 
 <ins>**Integrity checks:**</ins>
 
@@ -21,7 +19,6 @@ The Maintenance Engine module contains 1 command that can be run anywhere in you
 
 - Check all tickets have a corresponding transcript.
 - Check that the resolver names are still valid, this **does** check the users exist within the server.
-  {" "}
   <Info>
     You can only check the resolver names are valid within the scope of the
     server. Bots cannot see member objects and verify users outside of this
@@ -31,3 +28,72 @@ The Maintenance Engine module contains 1 command that can be run anywhere in you
 - Check all closed tickets have values in their fields.
 
 For more information on these checks, check the <a href="../database/">Database</a> chapter.
+
+The `MaintenanceEngine` class is a `Cog` for the [discord.py](https://discordpy.readthedocs.io/en/latest/) library, which allows for the creation of custom Discord commands. The class has the following methods and attributes:
+
+- `__init__()` - The constructor for the `MaintenanceEngine` class, which takes in the following parameters:
+- `bot` - An instance of the `commands.Bot` class representing the bot.
+- `db_connection` - A database connection object.
+- `cursor` - A database cursor object.
+- `me_scan()` - A `slash_command` that measures the latency of the bot and its database connection. The command responds with an [Embed](https://discordpy.readthedocs.io/en/latest/api.html#discord.Embed) that handles the database checks.
+
+## Importing
+
+To use the `MaintenanceEngine` class, the following modules must be imported:
+
+```python
+from discord.ext import commands
+from EmbedBuilder import EmbedBuilder
+import json
+import os
+import datetime
+```
+
+## Example Usage
+
+```python
+# Create a bot instance
+bot = commands.Bot(...)
+
+# Create a database connection and cursor
+db_connection = ...
+cursor = ...
+
+# Create an instance of the StandardCommands cog
+maintenance_engine = MaintenanceEngine(bot, db_connection)
+
+# Add the cog to the bot
+bot.add_cog(maintenance_engine)
+```
+
+Once the cog has been added to the bot, staff can use the `/me_scan` command to interact with the bot. For example, to check the database, a user would send the following message:
+
+```
+/me_scan
+```
+
+The bot would then respond with an Embed containing any database violations:
+
+```
+Database scan results
+
+Database Validity Checks
+These checks ensure that the entered data fits the parameters.
+
+Invalid resolver: 3
+Bot Bug
+
+Transcript not in database: 10
+6FO0hLgT
+
+Missing transcript: 13
+7p50qzfk
+
+Transcript not in database: 13
+7p50qzfk
+
+Transcript not in database: 17
+ajv98ebx
+
+...
+```
