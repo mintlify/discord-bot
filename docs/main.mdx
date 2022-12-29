@@ -8,8 +8,6 @@ which means any changes to subsidiary modules will pass through here at some poi
 
 ### mainloop
 
----
-
 ```python main.py
 import ...
 # ----------------------------------------------------------------
@@ -52,8 +50,6 @@ if __name__ == '__main__':
 ## Analysis
 
 ### Environment variables
-
----
 
 ```python main.py
 token: str | None = os.environ.get("MintlifyBotToken")
@@ -104,8 +100,6 @@ these variable names as long as you also use those names to define your environm
 </Tabs>
 
 ### Discord Bot API
-
----
 
 ```python main.py
 bot = discord.Bot(intents=discord.Intents.all(), command_prefix='/', case_insensitive=True)
