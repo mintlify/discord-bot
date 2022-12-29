@@ -19,9 +19,9 @@ the tools they need while community members are assured they have an open lines 
       <img src="https://www.dataquest.io/wp-content/uploads/2022/01/python-installer-img4.webp"/>
     </Frame>
 
-    You can verify both of these are installed by running in a shell:
+    You can verify pip was installed by running this command in the terminal:
 
-    ```bash Command Prompt
+    ```bash Terminal
     python --version && pip --version
     ```
 
@@ -51,10 +51,7 @@ the tools they need while community members are assured they have an open lines 
 
   </Tab>
   <Tab title="macOS">
-    To begin, you will need to install Python 3.10 or above:
-    - [Python Download Page](https://www.python.org/downloads/).
-
-    or you can install this via [Homebrew](https://brew.sh/):
+    To begin, you will need to install Python 3.10 or above. Visit the [Python Download Page](https://www.python.org/downloads/) or you can install Python via [Homebrew](https://brew.sh/):
 
     ```bash Terminal
     brew install python@3.10
@@ -67,7 +64,7 @@ the tools they need while community members are assured they have an open lines 
     python3 -m ensurepip
     ```
 
-    You can verify both of these are installed by running in a terminal:
+    You can verify pip was installed by running this command in the terminal:
     ```bash Terminal
     python3 --version && pip3 --version
     ```
@@ -97,10 +94,7 @@ the tools they need while community members are assured they have an open lines 
 
   </Tab>
   <Tab title="Linux">
-    To begin, you will need to install Python 3.10 or above:
-    - [Python Download Page](https://www.python.org/downloads/).
-
-    or you can install this via your <Tooltip tip="apt, pacman, dnf...">package manager</Tooltip>:
+    To begin, you will need to install Python 3.10 or above. Visit the Python Download Page](https://www.python.org/downloads/) or you can install Python via your <Tooltip tip="apt, pacman, dnf...">package manager</Tooltip>:
 
     ```bash Terminal
     brew install python@3.10
@@ -113,12 +107,13 @@ the tools they need while community members are assured they have an open lines 
     python3 -m ensurepip
     ```
 
-    You can verify both of these are installed by running in a terminal:
+    You can verify pip was installed by running this command in the terminal:
+    
     ```bash Terminal
     python3 --version && pip3 --version
     ```
     <Warning>`pip3 --version` may give you an error saying the command cannot be found.
-      In this case, `pip3` might be aliased differently. Try something like `pip` or `pip3.10`.</Warning>
+      In this case, `pip3` might be aliased differently. Try using `pip` or `pip3.10`.</Warning>
 
       Next, some extra PyPI modules are required for some of the bot's functionality:
 
