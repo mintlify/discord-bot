@@ -25,7 +25,7 @@ except Exception as e:
     print("\u001b[31mFailed to connect to server/database.\n\u001b[35mError description: %s \u001b[0m" % (repr(e)))
     sys.exit(-1)
 bot = discord.Bot(intents=discord.Intents.all(), command_prefix='/', case_insensitive=True)
-bot.add_cog(StandardCommands(bot, db_connection))
+bot.add_cog(StandardCommands(bot, db_connection, cursor))
 bot.add_cog(TicketCommands(bot, db_connection))
 
 # / Config
