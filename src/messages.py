@@ -26,9 +26,9 @@ SUPPORT_MESSAGE = """
 
 Are you sure you want to create a ticket? This is for reporting bugs, issues, suggesting features, reporting someone or other.
 
--Please be mindful when creating a ticket, as it uses a lot of resources and time. 
+-Please be mindful when creating a ticket, as it uses a lot of resources and time.
 -Please include all relevant information
--Make sure your privacy settings enable the bot to DM you. 
+-Make sure your privacy settings enable the bot to DM you.
 """
 DM_SUPPORT_MESSAGE_STAGE1 = """
 *Mintlify Support*
