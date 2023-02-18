@@ -1,9 +1,9 @@
-import discord.ext
 import json
 import os
-import pymysql
-
 import sys
+
+import discord.ext
+import pymysql
 
 from standard_commands import StandardCommands
 from TicketSystem import TicketCommands
@@ -30,7 +30,7 @@ bot.add_cog(TicketCommands(bot, db_connection))
 
 # / Config
 # ----------------------------------------------------------------
-with open(config_path) as config_file:
+with open(config_path, encoding="utf-8") as config_file:
     config = json.load(config_file)
     staff_roles = config["staff_roles"]
     administrator_role = config["administrator_role"]

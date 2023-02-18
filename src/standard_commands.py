@@ -32,10 +32,10 @@ class StandardCommands(commands.Cog):
 
     @commands.slash_command(name="staff", description="Meet the Community Staff!")
     async def staff(self, ctx) -> None:
-        embed = EmbedBuilder("Meet the Community Staff!", staff_message).build()
+        embed = EmbedBuilder("Meet the Community Staff!", STAFF_MESSAGE).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
     @commands.slash_command(name="help", description="Display help message.")
     async def helpme(self, ctx) -> None:
-        embed = EmbedBuilder("Help", help_message).build()
+        embed = EmbedBuilder("Help", HELP_MESSAGE).build()
         await ctx.respond(embed=embed, ephemeral=True)

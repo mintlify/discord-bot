@@ -1,15 +1,16 @@
 import asyncio
+import contextlib
 import datetime
-import discord
-import discord.ext
 import json
 import random
 import string
 
+import discord
+import discord.ext
 from discord.ext import commands
 
-from messages import *
 from EmbedBuilder import EmbedBuilder
+from messages import *
 
 
 class TicketCommands(commands.Cog):
@@ -20,7 +21,7 @@ class TicketCommands(commands.Cog):
         self.lst: list[str] = list(string.ascii_letters + string.digits)
         self.cursor = self.db_connection.cursor()
         self.config_file = None
-        with open("../config/config.json") as self.config_file:
+        with open("../config/config.json", encoding="utf-8") as self.config_file:
             self.config = json.load(self.config_file)
             self.staff_roles = self.config["staff_roles"]
             self.administrator_role = self.config["administrator_role"]
@@ -30,97 +31,84 @@ class TicketCommands(commands.Cog):
 
     @commands.slash_command(name="issue_ticket", description="Create a ticket.")
     async def issue_ticket(self, ctx, category: str, mentions: str) -> None:
-        if not any(role.id in self.staff_roles for role in ctx.author.roles):
+        if all(role.id not in self.staff_roles for role in ctx.author.roles):
             embed = EmbedBuilder("Error", "You do not have permission to use this command.").build()
             await ctx.respond(embed=embed, ephemeral=True)
             return
-        else:
-            await ctx.respond("Ticket issued.", ephemeral=True)
-            try:
-                guild = ctx.guild
-                staff_role = discord.utils.get(guild.roles, name="Moderators")
-            except AttributeError:
-                await ctx.respond("Creating tickets in DM is not supported. Please run this "
-                                  "in the server instead.", ephemeral=True)
-                return
-            # mentions argument is a string of mentions
-            if " " in mentions:
-                mentions = mentions.split(" ")
-            else:
-                # Split string into list of items of length 21
-                mentions = [mentions[i:i+21] for i in range(0, len(mentions), 21)]
-            ticket_opened_datetime = datetime.datetime.now()
-            ticket_opened_by = ctx.author.id
-            ticket_id = ""
-            staff_channel = discord.utils.get(guild.channels, name="tickets",
-                                              category=discord.utils.get(ctx.guild.categories, name="Staff"))
-            footer_message = "This ticket was opened on behalf of the participants by: %s" % ctx.author.mention
-            wordlist = open("../clean_words_alpha.txt", "r").read().splitlines()
-            for i in range(2):
-                ticket_id += random.choice(wordlist) + "-"
+        await ctx.respond("Ticket issued.", ephemeral=True)
+        try:
+            guild = ctx.guild
+            staff_role = discord.utils.get(guild.roles, name="Moderators")
+        except AttributeError:
+            await ctx.respond("Creating tickets in DM is not supported. Please run this "
+                                "in the server instead.", ephemeral=True)
+            return
+        ticket_opened_datetime = datetime.datetime.now()
+        ticket_opened_by = ctx.author.id
+        staff_channel = discord.utils.get(guild.channels, name="tickets",
+                                            category=discord.utils.get(ctx.guild.categories, name="Staff"))
+        footer_message = f"This ticket was opened on behalf of the participants by: {ctx.author.mention}"
+        wordlist = open("../clean_words_alpha.txt", "r", encoding="utf-8").read().splitlines()
+        mentions = (
+            mentions.split(" ")
+            if " " in mentions
+            else [mentions[i : i + 21] for i in range(0, len(mentions), 21)]
+        )
+        ticket_id = "".join(f"{random.choice(wordlist)}-" for _ in range(2))
+        ticket_id = ticket_id[:-1]
+        # Check this does not already exist
+        self.cursor.execute(f"SELECT * FROM tickets WHERE id = '{ticket_id}'")
+        while self.cursor.rowcount != 0:
+            ticket_id = "".join(f"{random.choice(wordlist)}-" for _ in range(2))
             ticket_id = ticket_id[:-1]
-            # Check this does not already exist
-            self.cursor.execute("SELECT * FROM tickets WHERE id = '%s'" % ticket_id)
-            while self.cursor.rowcount != 0:
-                ticket_id = ""
-                for i in range(2):
-                    ticket_id += random.choice(wordlist) + "-"
-                ticket_id = ticket_id[:-1]
-                self.cursor.execute("SELECT * FROM tickets WHERE id = '%s'" % ticket_id)
-            self.db_connection.ping()
-            self.cursor.execute(
-                "INSERT INTO tickets (id, category, opened_date, opened_by, response_time, time_to_complete, "
-                "resolver, team, transcript, closed) VALUES ('%s', '%s', '%s', '%s', 'Instant', NULL, '%s', '%s', "
-                "NULL, 'N')" % (
-                    ticket_id, category, ticket_opened_datetime, ticket_opened_by, ticket_opened_by, ctx.author.top_role.name))
-            self.db_connection.commit()
+            self.cursor.execute(f"SELECT * FROM tickets WHERE id = '{ticket_id}'")
+        self.db_connection.ping()
+        self.cursor.execute(
+            f"INSERT INTO tickets (id, category, opened_date, opened_by, response_time, time_to_complete, resolver, team, transcript, closed) VALUES ('{ticket_id}', '{category}', '{ticket_opened_datetime}', '{ticket_opened_by}', 'Instant', NULL, '{ticket_opened_by}', '{ctx.author.top_role.name}', NULL, 'N')"
+        )
+        self.db_connection.commit()
 
-            # Check for if the command was sent in DM to the bot
+        participants = "".join(f"{mention}, " for mention in mentions)
+        # Remove last 2 characters
+        participants = participants[:-2]
 
-            # Participant list
-            participants = ""
-            for mention in mentions:
-                participants += mention + ", "
-            # Remove last 2 characters
-            participants = participants[:-2]
-
-            channel = await guild.create_text_channel(name=ticket_id, category=discord.utils.get(ctx.guild.categories, name="Other"))
-            # Create ticket channel
-            first_embed = EmbedBuilder(title=category,
-                                       description=f"Ticket ID: {ticket_id} \n Description: {footer_message} \n Participants: {participants}") \
+        channel = await guild.create_text_channel(name=ticket_id, category=discord.utils.get(ctx.guild.categories, name="Other"))
+        # Create ticket channel
+        first_embed = EmbedBuilder(title=category,
+                                    description=f"Ticket ID: {ticket_id} \n Description: {footer_message} \n Participants: {participants}") \
                 .build()
-            second_embed = EmbedBuilder(title=category,
-                                        description=f"Ticket ID: {ticket_id} \n Description: {footer_message} \n\n "
-                                                    f"Ticket created. A member of staff will be with you shortly.") \
+        second_embed = EmbedBuilder(title=category,
+                                    description=f"Ticket ID: {ticket_id} \n Description: {footer_message} \n\n "
+                                                f"Ticket created. A member of staff will be with you shortly.") \
                 .build()
-            third_embed = EmbedBuilder(title=category,
-                                       description=f"Ticket ID: {ticket_id} \n Description: {footer_message} \n\n "
-                                                   f"Ticket created by {ctx.author.mention} \n Participants: {participants}") \
+        third_embed = EmbedBuilder(title=category,
+                                    description=f"Ticket ID: {ticket_id} \n Description: {footer_message} \n\n "
+                                                f"Ticket created by {ctx.author.mention} \n Participants: {participants}") \
                 .build()
-            # Hide the channel from everyone but the issuer
-            await channel.set_permissions(guild.default_role, view_channel=False)
-            await channel.set_permissions(ctx.author, view_channel=True, send_messages=True)
-            # Add the mentioned people to the channel
-            for mention in mentions:
-                # Convert each mention into objects
-                mention = discord.utils.get(guild.members, mention=mention)
-                await channel.set_permissions(mention, view_channel=True, send_messages=True)
-            # Hide channel from Staff role
-            await channel.set_permissions(staff_role, view_channel=False)
-            # Send message to channel
-            await channel.send(embed=first_embed)
-            # Send message to user
-            await ctx.author.send(embed=second_embed)
-            # Send message in the staff tickets channel
-            await staff_channel.send(embed=third_embed)
-            # Ping everyone in the channel
-            await channel.send(" ".join(mentions))
+        # Hide the channel from everyone but the issuer
+        await channel.set_permissions(guild.default_role, view_channel=False)
+        await channel.set_permissions(ctx.author, view_channel=True, send_messages=True)
+        # Add the mentioned people to the channel
+        for mention in mentions:
+            # Convert each mention into objects
+            mention = discord.utils.get(guild.members, mention=mention)
+            await channel.set_permissions(mention, view_channel=True, send_messages=True)
+        # Hide channel from Staff role
+        await channel.set_permissions(staff_role, view_channel=False)
+        # Send message to channel
+        await channel.send(embed=first_embed)
+        # Send message to user
+        await ctx.author.send(embed=second_embed)
+        # Send message in the staff tickets channel
+        await staff_channel.send(embed=third_embed)
+        # Ping everyone in the channel
+        await channel.send(" ".join(mentions))
 
 
 
     @commands.slash_command(name="open_tickets", description="Get a list of currently open tickets.")
     async def opentickets(self, ctx) -> None:
-        if not any(role.id in self.staff_roles for role in ctx.author.roles):
+        if all(role.id not in self.staff_roles for role in ctx.author.roles):
             embed = EmbedBuilder("Error", "You do not have permission to use this command.").build()
             await ctx.respond(embed=embed, ephemeral=True)
             return
@@ -141,9 +129,11 @@ class TicketCommands(commands.Cog):
             for ticket in tickets:
                 # Put datetime into readable format
                 date = ticket[2].strftime("%d/%m/%Y %H:%M:%S")
-                embed.add_field(name="Ticket ID: %s | Ticket Category: %s" % (ticket[0], ticket[1]),
-                                value="Ticket Opened: %s | Ticket Resolver: [%s] %s" % (date, ticket[7], ticket[6]),
-                                inline=True)
+                embed.add_field(
+                    name=f"Ticket ID: {ticket[0]} | Ticket Category: {ticket[1]}",
+                    value=f"Ticket Opened: {date} | Ticket Resolver: [{ticket[7]}] {ticket[6]}",
+                    inline=True,
+                )
             await ctx.respond(embed=embed, ephemeral=True)
 
     @commands.slash_command(name="get_transcript", description="Get a transcript of a ticket.")
@@ -151,7 +141,7 @@ class TicketCommands(commands.Cog):
         if any(role.id in self.staff_roles for role in ctx.author.roles):
             # Check if ticket exists
             self.db_connection.ping()
-            self.cursor.execute("SELECT transcript FROM tickets WHERE id = '%s'" % ticket_id)
+            self.cursor.execute(f"SELECT transcript FROM tickets WHERE id = '{ticket_id}'")
             result = self.cursor.fetchone()
             self.db_connection.commit()
             if result is None:
@@ -159,13 +149,16 @@ class TicketCommands(commands.Cog):
                 await ctx.respond(embed=embed, ephemeral=True)
                 return
             # Get file from transcript name in database
-            self.cursor.execute("SELECT transcript FROM tickets WHERE id = '%s'" % ticket_id)
+            self.cursor.execute(f"SELECT transcript FROM tickets WHERE id = '{ticket_id}'")
             transcript = self.cursor.fetchone()
             self.db_connection.commit()
-            path = "../transcripts/%s" % transcript[0]
+            path = f"../transcripts/{transcript[0]}"
             # Attach file to embed
-            embed = discord.Embed(title="Transcript", description="Transcript for ticket: %s" % ticket_id,
-                                  color=0x18e299)
+            embed = discord.Embed(
+                title="Transcript",
+                description=f"Transcript for ticket: {ticket_id}",
+                color=0x18E299,
+            )
             file = discord.File(path, filename="transcript.txt")
             await ctx.respond(embed=embed, file=file, ephemeral=True)
         else:
@@ -177,7 +170,7 @@ class TicketCommands(commands.Cog):
         if any(role.id in self.staff_roles for role in ctx.author.roles):
             # Check if ticket exists
             self.db_connection.ping()
-            self.cursor.execute("SELECT category FROM tickets WHERE id = '%s'" % ticket_id)
+            self.cursor.execute(f"SELECT category FROM tickets WHERE id = '{ticket_id}'")
             result = self.cursor.fetchone()
             if not result:
                 embed = EmbedBuilder("Error", "This ticket does not exist.").build()
@@ -204,7 +197,11 @@ class TicketCommands(commands.Cog):
                 embed = EmbedBuilder("Error", "This ticket does not exist.").build()
                 await ctx.respond(embed=embed, ephemeral=True)
                 return
-            embed = discord.Embed(title="Ticket Claim", description=f"Claimed ticket: %s" % ticket_id, color=0x18e299)
+            embed = discord.Embed(
+                title="Ticket Claim",
+                description=f"Claimed ticket: {ticket_id}",
+                color=0x18E299,
+            )
             await ctx.respond(embed=embed, ephemeral=True)
             # Remove the ticket embed from staff tickets channel
             channel = discord.utils.get(guild.channels, name="tickets",
@@ -238,21 +235,19 @@ class TicketCommands(commands.Cog):
                     self.db_connection.commit()
                     # Get time difference in HH:MM:SS
                     response_time = now - opened_date[0]
-                    original_embed.set_footer(text="Ticket claimed by: %s" % ctx.author)
+                    original_embed.set_footer(text=f"Ticket claimed by: {ctx.author}")
                     await message.edit(embed=original_embed)
-                    await channel.send(f"Ticket claimed by: %s" % ctx.author.mention)
+                    await channel.send(f"Ticket claimed by: {ctx.author.mention}")
                     # Show the channel to only the claimer, not other staff
                     await channel.set_permissions(ctx.author, read_messages=True, send_messages=True)
                     # Get the name of the top role of the resolver
                     top_role = resolver.top_role.name
                     # Update database
                     self.cursor.execute(
-                        "UPDATE tickets SET resolver = '%s', team = '%s', response_time = '%s' WHERE id = '%s'" % (
-                            resolver, top_role, response_time, ticket_id))
+                        f"UPDATE tickets SET resolver = '{resolver}', team = '{top_role}', response_time = '{response_time}' WHERE id = '{ticket_id}'"
+                    )
                     self.db_connection.commit()
                     break
-                else:
-                    pass
         else:
             embed = EmbedBuilder("Error", "You do not have permission to use this command.").build()
             await ctx.respond(embed=embed, ephemeral=True)
@@ -268,7 +263,7 @@ class TicketCommands(commands.Cog):
         if any(role.id in self.staff_roles for role in ctx.author.roles):
             # Check if ticket exists
             self.db_connection.ping()
-            self.cursor.execute("SELECT * FROM tickets WHERE id = '%s'" % ticket_id)
+            self.cursor.execute(f"SELECT * FROM tickets WHERE id = '{ticket_id}'")
             result = self.cursor.fetchone()
             self.db_connection.commit()
             if result is None:
@@ -276,7 +271,7 @@ class TicketCommands(commands.Cog):
                 await ctx.respond(embed=embed, ephemeral=True)
                 return
             # Check if ticket has been claimed
-            self.cursor.execute("SELECT resolver FROM tickets WHERE id = '%s'" % ticket_id)
+            self.cursor.execute(f"SELECT resolver FROM tickets WHERE id = '{ticket_id}'")
             resolver = self.cursor.fetchone()
             self.db_connection.commit()
             if resolver[0] is None:
@@ -301,28 +296,27 @@ class TicketCommands(commands.Cog):
             await channel.delete()
             # Save transcript to file, starting with the first message
             transcript.reverse()
-            transcript_file = open("../transcripts/%s.txt" % ticket_id, "w")
-            for message in transcript:
-                # Check if the message is an image or file
-                if message.attachments:
-                    # Get the URL of the attachment
-                    attachment_url = message.attachments[0].url
-                    # Get the name of the attachment
-                    attachment_name = message.attachments[0].filename
-                    # Write the attachment URL to the transcript
-                    transcript_file.write(f"{message.author}: {attachment_url} ({attachment_name})\n")
-                # Check if the message is an embed
-                elif message.embeds:
-                    # Save the message
-                    transcript_file.write("%s: %s" % (message.author, message.embeds[0].description.replace("\n", "|")))
-                    transcript_file.write("\n")
-                    continue
-                # Check if message is a system message
-                elif message.type == discord.MessageType.default:
-                    transcript_file.write("%s: %s\n" % (message.author, message.content))
-                else:
-                    transcript_file.write("[Uncaught Message] %s: %s\n" % (message.author, message.content))
-            transcript_file.close()
+            with open(f"../transcripts/{ticket_id}.txt", "w", encoding="utf-8") as transcript_file:
+                for message in transcript:
+                    # Check if the message is an image or file
+                    if message.attachments:
+                        # Get the URL of the attachment
+                        attachment_url = message.attachments[0].url
+                        # Get the name of the attachment
+                        attachment_name = message.attachments[0].filename
+                        # Write the attachment URL to the transcript
+                        transcript_file.write(f"{message.author}: {attachment_url} ({attachment_name})\n")
+                    # Check if the message is an embed
+                    elif message.embeds:
+                        # Save the message
+                        transcript_file.write("%s: %s" % (message.author, message.embeds[0].description.replace("\n", "|")))
+                        transcript_file.write("\n")
+                        continue
+                    # Check if message is a system message
+                    elif message.type == discord.MessageType.default:
+                        transcript_file.write(f"{message.author}: {message.content}\n")
+                    else:
+                        transcript_file.write(f"[Uncaught Message] {message.author}: {message.content}\n")
             # DM the user who opened the ticket
             self.cursor.execute("SELECT opened_by FROM tickets WHERE id = %s", ticket_id)
             opened_by = self.cursor.fetchone()
@@ -335,7 +329,7 @@ class TicketCommands(commands.Cog):
             await user.send(embed=embed)
             # Get time elapsed between response_time and closing the ticket
             # DM the user the transcript file
-            await user.send(file=discord.File("../transcripts/%s.txt" % ticket_id))
+            await user.send(file=discord.File(f"../transcripts/{ticket_id}.txt"))
 
             # Get the opened_by and resolver from the database
             self.cursor.execute("SELECT opened_by, resolver FROM tickets WHERE id = %s", ticket_id)
@@ -354,7 +348,7 @@ class TicketCommands(commands.Cog):
                         # Get the mentions out of this
                         participants = participants.split(", ")
                 for i in participants:
-                    try:
+                    with contextlib.suppress(Exception):
                         # Replace any spaces or commas
                         i = i.lstrip().replace(",", "").replace("<", "").replace(">", "").replace("@", "")
                         # Replace it in the array
@@ -363,10 +357,8 @@ class TicketCommands(commands.Cog):
                         await user.send(embed=embed)
                         # Get time elapsed between response_time and closing the ticket
                         # DM the user the transcript file
-                        await user.send(file=discord.File("../transcripts/%s.txt" % ticket_id))
+                        await user.send(file=discord.File(f"../transcripts/{ticket_id}.txt"))
                         await asyncio.sleep(1)
-                    except:
-                        pass
             self.cursor.execute("SELECT opened_date FROM tickets WHERE id = %s", ticket_id)
             opened_date = self.cursor.fetchone()
             self.db_connection.commit()
@@ -374,23 +366,26 @@ class TicketCommands(commands.Cog):
             time_elapsed = closed_date - opened_date[0]
             # Update database
             self.cursor.execute(
-                "UPDATE tickets SET time_to_complete = '%s', transcript = '%s.txt', closed = 'Y' WHERE id = '%s'" % (
-                    time_elapsed, ticket_id, ticket_id))
+                f"UPDATE tickets SET time_to_complete = '{time_elapsed}', transcript = '{ticket_id}.txt', closed = 'Y' WHERE id = '{ticket_id}'"
+            )
             self.db_connection.commit()
-            embed = discord.Embed(title="Ticket Closed", description=f"Closed ticket: %s" % ticket_id, color=0x18e299)
+            embed = discord.Embed(
+                title="Ticket Closed",
+                description=f"Closed ticket: {ticket_id}",
+                color=0x18E299,
+            )
             await ctx.respond(embed=embed, ephemeral=True)
             # Send a notification into the management ticket channel
             # Get ticket from database with the ticket ID
-            self.cursor.execute("SELECT * FROM tickets WHERE id = '%s'" % ticket_id)
+            self.cursor.execute(f"SELECT * FROM tickets WHERE id = '{ticket_id}'")
             ticket = self.cursor.fetchone()
             self.db_connection.commit()
-            if issued_on_behalf:
-                participants = participants
-            else:
-                participants = opened_by
-            embed = discord.Embed(title="A ticket has been closed!",
-                                  description=f"Ticket closed: %s | Ticket Resolver: [%s] %s | Transcript: %s | Participants: %s" % (
-                                      ticket[0], ticket[7], ticket[6], ticket[8], participants), color=0x18e299)
+            participants = participants if issued_on_behalf else opened_by
+            embed = discord.Embed(
+                title="A ticket has been closed!",
+                description=f"Ticket closed: {ticket[0]} | Ticket Resolver: [{ticket[7]}] {ticket[6]} | Transcript: {ticket[8]} | Participants: {participants}",
+                color=0x18E299,
+            )
             channel = discord.utils.get(ctx.guild.channels, name="tickets",
                                         category=discord.utils.get(guild.categories, name="Administrators"))
             # Send embed into channel
@@ -409,7 +404,7 @@ class TicketCommands(commands.Cog):
         if any(role1.id in self.staff_roles for role1 in ctx.author.roles):
             # Check if ticket exists
             self.db_connection.ping()
-            self.cursor.execute("SELECT * FROM tickets WHERE id = '%s'" % ticket_id)
+            self.cursor.execute(f"SELECT * FROM tickets WHERE id = '{ticket_id}'")
             result = self.cursor.fetchone()
             self.db_connection.commit()
             if result is None:
@@ -472,11 +467,15 @@ class TicketCommands(commands.Cog):
             except discord.errors.HTTPException:
                 pass
             # Update database
-            self.cursor.execute("UPDATE tickets SET resolver = NULL, team = '%s' WHERE id = '%s'" % (role.name,
-                                                                                                     ticket_id))
+            self.cursor.execute(
+                f"UPDATE tickets SET resolver = NULL, team = '{role.name}' WHERE id = '{ticket_id}'"
+            )
             self.db_connection.commit()
-            embed = discord.Embed(title="Ticket Transferred", description=f"Transferred ticket: %s" % ticket_id,
-                                  color=0x18e299)
+            embed = discord.Embed(
+                title="Ticket Transferred",
+                description=f"Transferred ticket: {ticket_id}",
+                color=0x18E299,
+            )
             await ctx.respond(embed=embed, ephemeral=True)
             # Send new embed
             embed = discord.Embed(title="Ticket Transferred", description=f"Ticket transferred to: {role.mention}",
@@ -510,7 +509,7 @@ class TicketCommands(commands.Cog):
             await ctx.respond("Creating tickets in DM is not supported. Please run this "
                               "in the server instead.", ephemeral=True)
             return
-        embed = EmbedBuilder("Support", support_message).build()
+        embed = EmbedBuilder("Support", SUPPORT_MESSAGE).build()
         await ctx.respond(embed=embed, ephemeral=True)
         # DM command issuer
         dm_embed = discord.Embed(title="Create Ticket", description=DM_support_message_stage1, color=0x18e299)
@@ -523,15 +522,15 @@ class TicketCommands(commands.Cog):
         stage2message = None
         staff_channel = discord.utils.get(guild.channels, name="tickets",
                                           category=discord.utils.get(ctx.guild.categories, name="Staff"))
-        wordlist = open("../clean_words_alpha.txt", "r").read().splitlines()
-        for i in range(2):
-            ticket_id += random.choice(wordlist) + "-"
-        self.cursor.execute("SELECT * FROM tickets WHERE id = '%s'" % ticket_id)
+        wordlist = open("../clean_words_alpha.txt", "r", encoding="utf-8").read().splitlines()
+        for _ in range(2):
+            ticket_id += f"{random.choice(wordlist)}-"
+        self.cursor.execute(f"SELECT * FROM tickets WHERE id = '{ticket_id}'")
         while self.cursor.rowcount != 0:
             ticket_id = ""
-            for i in range(2):
-                ticket_id += random.choice(wordlist) + "-"
-            self.cursor.execute("SELECT * FROM tickets WHERE id = '%s'" % ticket_id)
+            for _ in range(2):
+                ticket_id += f"{random.choice(wordlist)}-"
+            self.cursor.execute(f"SELECT * FROM tickets WHERE id = '{ticket_id}'")
         # Add reactions
         await message.add_reaction("1️⃣")
         await message.add_reaction("2️⃣")
@@ -542,10 +541,16 @@ class TicketCommands(commands.Cog):
 
         # Wait for reaction on the DM
         def check(user_reaction, user_object) -> bool:
-            return user_object == ctx.author and str(user_reaction.emoji) in ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "❌"]
+            return user_object == ctx.author and str(user_reaction.emoji) in {
+                "1️⃣",
+                "2️⃣",
+                "3️⃣",
+                "4️⃣",
+                "❌",
+            }
 
         try:
-            reaction, user = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
+            reaction, _ = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
             # Delete the message
             await message.delete()
             self.db_connection.ping()
@@ -568,7 +573,7 @@ class TicketCommands(commands.Cog):
                                         description="Please describe the suggestion. Include any screenshots by "
                                                     "adding "
                                                     "Imgur links.") \
-                    .build()
+                                .build()
                 stage2message = await ctx.author.send(embed=dm_embed)
 
             elif reaction.emoji == "3️⃣":
@@ -580,7 +585,7 @@ class TicketCommands(commands.Cog):
                                         description="Please detail the report. Include any screenshots by adding "
                                                     "Imgur "
                                                     "links.") \
-                    .build()
+                                .build()
                 stage2message = await ctx.author.send(embed=dm_embed)
 
             elif reaction.emoji == "4️⃣":
@@ -592,14 +597,14 @@ class TicketCommands(commands.Cog):
                                         description="Please detail the issue you are having. Include any screenshots "
                                                     "by "
                                                     "adding Imgur links.") \
-                    .build()
+                                .build()
                 stage2message = await ctx.author.send(embed=dm_embed)
 
             elif reaction.emoji == "❌":
                 # Update embed
                 dm_embed = EmbedBuilder(title="Ticket Creation",
                                         description="Ticket creation cancelled.") \
-                    .build()
+                                .build()
                 # Send message, not edit
                 await ctx.author.send(embed=dm_embed)
                 return
@@ -621,15 +626,15 @@ class TicketCommands(commands.Cog):
             # Create ticket channel
             first_embed = EmbedBuilder(title=category,
                                        description=f"Ticket ID: {ticket_id} \n Description: {message.content}") \
-                .build()
+                            .build()
             second_embed = EmbedBuilder(title=category,
                                         description=f"Ticket ID: {ticket_id} \n Description: {message.content} \n\n "
                                                     f"Ticket created. A member of staff will be with you shortly.") \
-                .build()
+                            .build()
             third_embed = EmbedBuilder(title=category,
                                        description=f"Ticket ID: {ticket_id} \n Description: {message.content} \n\n "
                                                    f"Ticket created by {ctx.author.mention}.") \
-                .build()
+                            .build()
             # Hide the channel from everyone but the issuer
             await channel.set_permissions(guild.default_role, view_channel=False)
             await channel.set_permissions(ctx.author, view_channel=True, send_messages=True)
@@ -646,4 +651,3 @@ class TicketCommands(commands.Cog):
             await message.delete()
             await ctx.author.send("You took too long to respond.")
             return
-

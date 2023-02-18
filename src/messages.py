@@ -1,4 +1,4 @@
-staff_message = """
+STAFF_MESSAGE = """
 
 :herb: Mintlify Staff
 
@@ -13,7 +13,7 @@ staff_message = """
 **[Developer]** <@882779998782636042>
 
 """
-help_message = """
+HELP_MESSAGE = """
 
 :herb: If you need to report a bug or make a suggestion, please use the mintlify-help forum that you can find
 under the Mintlify category.
@@ -21,7 +21,7 @@ under the Mintlify category.
 If you need to make a ticket, run `/support` in any channel to open a ticket. You **must** have your DM open for this to work.
 
 """
-support_message = """
+SUPPORT_MESSAGE = """
 *Mintlify Support*
 
 Are you sure you want to create a ticket? This is for reporting bugs, issues, suggesting features, reporting someone or other.
@@ -30,7 +30,7 @@ Are you sure you want to create a ticket? This is for reporting bugs, issues, su
 -Please include all relevant information
 -Make sure your privacy settings enable the bot to DM you. 
 """
-DM_support_message_stage1 = """
+DM_SUPPORT_MESSAGE_STAGE1 = """
 *Mintlify Support*
 
 Please select a category for your ticket:

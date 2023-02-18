@@ -1,17 +1,13 @@
-import asyncio
 import datetime
+import json
 import os
 
 import discord
 import discord.ext
-import json
-import random
-import string
-
 from discord.ext import commands
 
-from messages import *
 from EmbedBuilder import EmbedBuilder
+from messages import *
 
 
 class MaintenanceEngine(commands.Cog):
@@ -22,7 +18,7 @@ class MaintenanceEngine(commands.Cog):
         self.cursor = self.db_connection.cursor()
         self.config_file = None
         self.scan_results = {}
-        with open("../config/config.json") as self.config_file:
+        with open("../config/config.json", encoding="utf=8") as self.config_file:
             self.config = json.load(self.config_file)
             self.staff_roles = self.config["staff_roles"]
             self.administrator_role = self.config["administrator_role"]
@@ -51,7 +47,7 @@ class MaintenanceEngine(commands.Cog):
                     self.scan_results["Invalid ticket ID: %s" %
                                       tickets.index(ticket)] = ticket[0].rstrip()
                     continue
-                elif ticket[0].rstrip() in self.scan_results.values():
+                if ticket[0].rstrip() in self.scan_results.values():
                     self.scan_results["Duplicate ticket ID: %s" %
                                       tickets.index(ticket)] = ticket[0].rstrip()
                     continue
@@ -70,7 +66,7 @@ class MaintenanceEngine(commands.Cog):
                     self.scan_results["NULL category: %s" %
                                       tickets.index(ticket)] = ticket[0].rstrip()
                     continue
-                elif ticket[1].rstrip() not in ["Bug Report", "Suggestion", "Other",
+                if ticket[1].rstrip() not in ["Bug Report", "Suggestion", "Other",
                                                 "User "
                                                 "Report"]:
                     self.scan_results["Invalid category: %s" %
