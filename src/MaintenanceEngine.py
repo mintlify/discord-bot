@@ -66,9 +66,12 @@ class MaintenanceEngine(commands.Cog):
                     self.scan_results["NULL category: %s" %
                                       tickets.index(ticket)] = ticket[0].rstrip()
                     continue
-                if ticket[1].rstrip() not in ["Bug Report", "Suggestion", "Other",
-                                                "User "
-                                                "Report"]:
+                if ticket[1].rstrip() not in [
+                    "Bug Report",
+                    "Suggestion",
+                    "Other",
+                    "User "
+                        "Report"]:
                     self.scan_results["Invalid category: %s" %
                                       tickets.index(ticket)] = ticket[0].rstrip()
                     continue
@@ -89,8 +92,8 @@ class MaintenanceEngine(commands.Cog):
                     self.scan_results["NULL opened_date: %s" %
                                       tickets.index(ticket)] = ticket[0].rstrip()
                     continue
-            if not any(
-                    ["Future opened_date", "NULL opened_date", "Invalid opened_date"]) not in self.scan_results.keys():
+            if not any(["Future opened_date", "NULL opened_date",
+                        "Invalid opened_date"]) not in self.scan_results.keys():
                 self.scan_results["validity_ticketOpenedDate"] = "No issues found."
 
             # Fourth scan, check for invalid Discord IDs
@@ -230,7 +233,9 @@ class MaintenanceEngine(commands.Cog):
                 # Try to get channel
                 try:
                     discord.utils.get(
-                        ctx.guild.channels, name=ticket[0].lower().rstrip(), category=ticket[1])
+                        ctx.guild.channels,
+                        name=ticket[0].lower().rstrip(),
+                        category=ticket[1])
                 except discord.errors.NotFound:
                     self.scan_results["Ticket status mismatch: %s" %
                                       tickets.index(ticket)] = ticket[0].rstrip()
@@ -240,8 +245,9 @@ class MaintenanceEngine(commands.Cog):
 
             # Fourth scan, check that all closed tickets have values in each
             # field
-            self.cursor.execute("SELECT id, category, opened_date, opened_by, response_time, time_to_complete, "
-                                "resolver, team, transcript, closed FROM tickets WHERE closed = 'Y'")
+            self.cursor.execute(
+                "SELECT id, category, opened_date, opened_by, response_time, time_to_complete, "
+                "resolver, team, transcript, closed FROM tickets WHERE closed = 'Y'")
             tickets = self.cursor.fetchall()
             for ticket in tickets:
                 # Check that no values are NULL
@@ -310,12 +316,16 @@ class MaintenanceEngine(commands.Cog):
             # Build the embed
             embed = discord.Embed(
                 title="Database scan results", color=0x00ff00)
-            embed.add_field(name="Database Validity Checks",
-                            value="These checks ensure that the entered data fits the parameters.", inline=False)
+            embed.add_field(
+                name="Database Validity Checks",
+                value="These checks ensure that the entered data fits the parameters.",
+                inline=False)
             for key, value in list(self.scan_results.items()):
                 # Check for all validity checks before checking for key
                 # starting with validity_
-                if any(["Duplicate ticket ID" in key, "Invalid ticket ID" in key, "NULL category" in key,
+                if any(["Duplicate ticket ID" in key,
+                        "Invalid ticket ID" in key,
+                        "NULL category" in key,
                         "Invalid category" in key,
                         "Future opened_date" in key,
                         "NULL opened_date" in key,
@@ -329,8 +339,7 @@ class MaintenanceEngine(commands.Cog):
                         "NULL resolver" in key,
                         "Invalid resolver" in key,
                         "NULL transcript" in key,
-                        "Invalid transcript" in key
-                        ]):
+                        "Invalid transcript" in key]):
                     embed.add_field(name=key, value=value, inline=False)
                     # Remove key from dictionary
                     self.scan_results.pop(key)
@@ -347,12 +356,15 @@ class MaintenanceEngine(commands.Cog):
                     self.scan_results.pop(key)
                 else:
                     continue
-            embed.add_field(name="Database Consistency and Integrity Checks",
-                            value="These checks ensure that the data is consistent and accurate.", inline=False)
+            embed.add_field(
+                name="Database Consistency and Integrity Checks",
+                value="These checks ensure that the data is consistent and accurate.",
+                inline=False)
             for key, value in list(self.scan_results.items()):
-                if any(["Missing transcript" in key, "Transcript not in database" in key, "Resolver name change" in key,
-                        "Ticket status mismatch" in key
-                        ]):
+                if any(["Missing transcript" in key,
+                        "Transcript not in database" in key,
+                        "Resolver name change" in key,
+                        "Ticket status mismatch" in key]):
                     embed.add_field(name=key, value=value, inline=False)
                     self.scan_results.pop(key)
                 elif any(["ci_ticketResolver" in key, "ci_ticketStatus" in key, "ci_ticketNulls" in key]):
@@ -362,6 +374,8 @@ class MaintenanceEngine(commands.Cog):
                     continue
             await ctx.respond(embed=embed, ephemeral=True)
         else:
-            embed = EmbedBuilder(title="Error", description="You do not have permission to use this command.",
-                                 color=0xff0000).build()
+            embed = EmbedBuilder(
+                title="Error",
+                description="You do not have permission to use this command.",
+                color=0xff0000).build()
             await ctx.respond(embed=embed, ephemeral=True)

@@ -25,14 +25,19 @@ class StandardCommands(commands.Cog):
         end: float = time.perf_counter()
         # Calculate database latency
         latency: int = round((end - start) * 1000)
-        network_latency: float = round(measure_latency(host='google.com')[0], 2)
-        embed = EmbedBuilder("Ping",
-                             f"**Database Latency:** {latency}ms\n**Network Latency:** {network_latency}ms").build()
+        network_latency: float = round(
+            measure_latency(host='google.com')[0], 2)
+        embed = EmbedBuilder(
+            "Ping",
+            f"**Database Latency:** {latency}ms\n**Network Latency:** {network_latency}ms").build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-    @commands.slash_command(name="staff", description="Meet the Community Staff!")
+    @commands.slash_command(name="staff",
+                            description="Meet the Community Staff!")
     async def staff(self, ctx) -> None:
-        embed = EmbedBuilder("Meet the Community Staff!", STAFF_MESSAGE).build()
+        embed = EmbedBuilder(
+            "Meet the Community Staff!",
+            STAFF_MESSAGE).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
     @commands.slash_command(name="help", description="Display help message.")
