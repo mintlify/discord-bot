@@ -2,7 +2,7 @@ import discord
 
 
 class EmbedBuilder:
-    def __init__(self, title, description, color=0x18e299, image=None) -> None:
+    def __init__(self, title, description, color=0x18E299, image=None) -> None:
         self.title: str | None = title
         self.description: str | None = description
         self.color = color
@@ -13,7 +13,8 @@ class EmbedBuilder:
         embed = discord.Embed(
             title=self.title,
             description=self.description,
-            color=self.color)
+            color=self.color,
+        )
         if self.image:
             embed.set_image(url=self.image)
         embed.set_footer(text=self.footer)
